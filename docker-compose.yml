@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgis/postgis:15-3.3
+    environment:
+      POSTGRES_USER: roadguard
+      POSTGRES_PASSWORD: roadguard
+      POSTGRES_DB: roadguard
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+  backend:
+    build: ./backend
+    env_file: .env
+    ports:
+      - '4000:4000'
+    depends_on:
+      - postgres
+      - redis
+  frontend:
+    build: ./frontend
+    env_file: .env
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+  ai-service:
+    build: ./ai-service
+    env_file: .env
+    ports:
+      - '8000:8000'
+    depends_on:
+      - postgres
+volumes:
+  pgdata:
+    driver: local
